@@ -1,7 +1,7 @@
 import requests
 import pandas as pd
-from datetime import datetime
-import os
+from datetime import datetime, UTC
+from sqlalchemy import create_engine
 
 url = "https://api.coingecko.com/api/v3/coins/markets"
 
@@ -25,12 +25,17 @@ df = pd.DataFrame(data)[[
     "total_volume"
 ]]
 
-df["timestamp"] = datetime.utcnow()
+df["timestamp"] = datetime.now(UTC)
 
-os.makedirs("../data", exist_ok=True)
+engine = create_engine(
+    "postgresql://admin:admin@localhost:5432/fintech_data"
+)
 
-file_name = f"../data/crypto_data_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}.csv"
+df.to_sql(
+    "crypto_prices",
+    engine,
+    if_exists="append",
+    index=False
+)
 
-df.to_csv(file_name, index=False)
-
-print("Data saved:", file_name)
+print("Data inserted into database")
