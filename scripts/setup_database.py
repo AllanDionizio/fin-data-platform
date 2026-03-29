@@ -4,8 +4,15 @@ engine = create_engine(
     "postgresql://admin:admin@localhost:5432/fintech_data"
 )
 
-create_table_query = """
-CREATE TABLE IF NOT EXISTS crypto_prices (
+create_raw_table = """
+CREATE TABLE IF NOT EXISTS raw_crypto_prices (
+    data JSONB,
+    ingestion_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+"""
+
+create_staging_table = """
+CREATE TABLE IF NOT EXISTS staging_crypto_prices (
     id TEXT,
     symbol TEXT,
     name TEXT,
@@ -17,7 +24,8 @@ CREATE TABLE IF NOT EXISTS crypto_prices (
 """
 
 with engine.connect() as conn:
-    conn.execute(text(create_table_query))
+    conn.execute(text(create_raw_table))
+    conn.execute(text(create_staging_table))
     conn.commit()
 
-print("Table created successfully")
+print("RAW table created")

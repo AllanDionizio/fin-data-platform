@@ -1,7 +1,7 @@
 import requests
-import pandas as pd
+from sqlalchemy import create_engine, text
 from datetime import datetime, UTC
-from sqlalchemy import create_engine
+import json
 
 url = "https://api.coingecko.com/api/v3/coins/markets"
 
@@ -13,29 +13,38 @@ params = {
 }
 
 response = requests.get(url, params=params)
-
 data = response.json()
-
-df = pd.DataFrame(data)[[
-    "id",
-    "symbol",
-    "name",
-    "current_price",
-    "market_cap",
-    "total_volume"
-]]
-
-df["timestamp"] = datetime.now(UTC)
 
 engine = create_engine(
     "postgresql://admin:admin@localhost:5432/fintech_data"
 )
 
-df.to_sql(
-    "crypto_prices",
-    engine,
-    if_exists="append",
-    index=False
-)
+insert_query = """
+INSERT INTO raw_crypto_prices (data, ingestion_timestamp)
+VALUES (:data, :timestamp)
+"""
 
-print("Data inserted into database")
+with engine.connect() as conn:
+    for record in data:
+        conn.execute(
+            text(insert_query),
+            {
+                "data": json.dumps(record),
+                "timestamp": datetime.now(UTC)
+            }
+        )
+    conn.commit()
+
+print("Raw data inserted")
+
+create_staging_table = """
+CREATE TABLE IF NOT EXISTS staging_crypto_prices (
+    id TEXT,
+    symbol TEXT,
+    name TEXT,
+    current_price FLOAT,
+    market_cap BIGINT,
+    total_volume BIGINT,
+    timestamp TIMESTAMP
+)
+"""
