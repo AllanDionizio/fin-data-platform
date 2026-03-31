@@ -23,9 +23,25 @@ CREATE TABLE IF NOT EXISTS staging_crypto_prices (
 )
 """
 
+print("RAW table created")
+
+create_mart_table = """
+CREATE TABLE IF NOT EXISTS mart_top_crypto (
+    id TEXT,
+    symbol TEXT,
+    name TEXT,
+    current_price FLOAT,
+    market_cap BIGINT,
+    total_volume BIGINT,
+    rank INT,
+    updated_at TIMESTAMP
+)
+"""
+
+print("Top Crypto table created")
+
 with engine.connect() as conn:
     conn.execute(text(create_raw_table))
     conn.execute(text(create_staging_table))
+    conn.execute(text(create_mart_table))
     conn.commit()
-
-print("RAW table created")
