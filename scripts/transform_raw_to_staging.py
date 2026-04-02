@@ -15,6 +15,7 @@ SELECT
     (data->>'total_volume')::bigint,
     ingestion_timestamp
 FROM raw_crypto_prices
+ON CONFLICT (id,timestamp) DO NOTHING
 """
 
 with engine.connect() as conn:

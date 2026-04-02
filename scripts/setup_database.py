@@ -19,7 +19,8 @@ CREATE TABLE IF NOT EXISTS staging_crypto_prices (
     current_price FLOAT,
     market_cap BIGINT,
     total_volume BIGINT,
-    timestamp TIMESTAMP
+    timestamp TIMESTAMP,
+    UNIQUE (id,timestamp)
 )
 """
 
@@ -34,7 +35,8 @@ CREATE TABLE IF NOT EXISTS mart_top_crypto (
     market_cap BIGINT,
     total_volume BIGINT,
     rank INT,
-    updated_at TIMESTAMP
+    updated_at TIMESTAMP,
+    UNIQUE (id, updated_at)
 )
 """
 
