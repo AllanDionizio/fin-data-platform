@@ -17,7 +17,18 @@ SELECT
     total_volume,
     RANK() OVER (ORDER BY market_cap DESC) as rank,
     NOW() as updated_at
-FROM staging_crypto_prices
+FROM (
+    SELECT DISTINCT ON (id)
+        id,
+        symbol,
+        name,
+        current_price,
+        market_cap,
+        total_volume,
+        timestamp
+    FROM staging_crypto_prices
+    ORDER BY id, timestamp DESC
+) sub
 """
 
 with engine.begin() as conn:
